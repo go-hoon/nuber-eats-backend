@@ -4,6 +4,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ExampleModule } from './example/example.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { Example } from './example/entities/example.entity';
 
 @Module({
   imports: [
@@ -27,8 +28,9 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      synchronize: true, // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
+      synchronize: process.env.NODE_ENV !== 'prod', // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
       logging: true, // console에 logging하는 옵션
+      entities: [Example],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
