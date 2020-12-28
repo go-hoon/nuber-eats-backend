@@ -57,6 +57,7 @@ export class UsersService {
       return {
         ok: true,
         error: null,
+        token,
       };
     } catch (error) {
       return {
