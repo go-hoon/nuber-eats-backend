@@ -8,13 +8,20 @@ export class ExampleResolver {
   constructor(private readonly exampleService: ExampleService) {}
 
   @Query(() => [Example])
-  Examples(): Promise<Example[]> {
+  examples(): Promise<Example[]> {
     return this.exampleService.getAll();
   }
 
   @Mutation(() => Boolean)
-  CreateRestaurant(@Args() CreateRestaurantDto: CreateRestaurantDto): boolean {
-    console.log(CreateRestaurantDto);
-    return true;
+  async createRestaurant(
+    @Args() createRestaurantDto: CreateRestaurantDto,
+  ): Promise<boolean> {
+    try {
+      await this.exampleService.createRestaurant(createRestaurantDto);
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
   }
 }
