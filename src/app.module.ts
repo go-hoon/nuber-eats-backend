@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import * as Joi from 'joi';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ExampleModule } from './example/example.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Example } from './example/entities/example.entity';
+import { UsersModule } from './users/users.module';
+import { CommonModule } from './common/common.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -29,13 +30,14 @@ import { Example } from './example/entities/example.entity';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod', // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
-      logging: true, // console에 logging하는 옵션
-      entities: [Example],
+      logging: process.env.NODE_ENV !== 'prod', // console에 logging하는 옵션
+      entities: [User],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
     }),
-    ExampleModule,
+    UsersModule,
+    CommonModule,
   ],
   controllers: [],
   providers: [],
