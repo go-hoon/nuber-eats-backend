@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { CreateAccountInput } from './dtos/create-account.dts';
 import { LoginInput } from './dtos/login.dto';
 import { User } from './entities/user.entity';
-import * as jwt from 'jsonwebtoken';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/jwt/jwt.service';
 
@@ -14,9 +13,7 @@ export class UsersService {
     @InjectRepository(User) private readonly users: Repository<User>,
     private readonly config: ConfigService,
     private readonly jwtService: JwtService,
-  ) {
-    jwtService.hello();
-  }
+  ) {}
 
   async createAccount({
     email,
@@ -57,7 +54,7 @@ export class UsersService {
           error: 'Wrong password',
         };
       }
-      const token = jwt.sign({ id: user.id }, this.config.get('SECRET_KEY'));
+      const token = this.jwtService.sign(user.id);
       return {
         ok: true,
         error: null,
