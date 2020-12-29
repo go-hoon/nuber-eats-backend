@@ -1,14 +1,26 @@
-// import { NestMiddleware, RequestMethod } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction } from 'express';
+import { UsersService } from 'src/users/users.service';
+import { JwtService } from './jwt.service';
 
-// export class JwtMiddleware implements NestMiddleware {
-//   use(req: Request, res: Response, next: NextFunction) {
-//     console.log(req.headers);
-//     next();
-//   }
-// }
+@Injectable()
+export class JwtMiddleware implements NestMiddleware {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UsersService,
+  ) {}
 
-export function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
-  console.log(req.headers);
-  next();
+  async use(req: Request, res: Response, next: NextFunction) {
+    if ('x-jwt' in req.headers) {
+      const token = req.headers['x-jwt'];
+      const decoded = this.jwtService.verify(token);
+      if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
+        try {
+          const user = await this.userService.findbyId(decoded['id']);
+          req['user'] = user;
+        } catch (e) {}
+      }
+    }
+    next();
+  }
 }
