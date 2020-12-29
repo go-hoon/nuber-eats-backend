@@ -1,0 +1,14 @@
+// import { NestMiddleware, RequestMethod } from '@nestjs/common';
+import { NextFunction } from 'express';
+
+// export class JwtMiddleware implements NestMiddleware {
+//   use(req: Request, res: Response, next: NextFunction) {
+//     console.log(req.headers);
+//     next();
+//   }
+// }
+
+export function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
+  console.log(req.headers);
+  next();
+}
