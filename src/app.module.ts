@@ -43,6 +43,9 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
+      context: ({ req }) => {
+        return { user: req.user };
+      },
     }),
     UsersModule,
     CommonModule,
