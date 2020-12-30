@@ -13,7 +13,7 @@ import { CommonModule } from './common/common.module';
 import { User } from './users/entities/user.entity';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
-import { AuthorizationModule } from './authorization/authorization.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -51,7 +51,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
     UsersModule,
     CommonModule,
     JwtModule.forRoot({ privateKey: process.env.PRIVATE_KEY }),
-    AuthorizationModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
