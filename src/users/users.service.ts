@@ -111,7 +111,6 @@ export class UsersService {
         const verification = await this.verifications.save(
           this.verifications.create({ user }),
         );
-        console.log(verification.code);
         this.mailService.sendVerificationEmail(user.email, verification.code);
       }
       if (password) {
