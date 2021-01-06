@@ -57,7 +57,6 @@ export class UsersService {
         { email },
         { select: ['id', 'password'] },
       );
-      console.log(user);
       if (!user) {
         return {
           ok: false,
@@ -74,13 +73,12 @@ export class UsersService {
       const token = this.jwtService.sign(user.id);
       return {
         ok: true,
-        error: null,
         token,
       };
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: "Can't log user in",
       };
     }
   }
