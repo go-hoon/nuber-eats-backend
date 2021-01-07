@@ -123,7 +123,7 @@ export class UsersService {
     } catch (error) {
       return {
         ok: false,
-        error,
+        error: 'Could not update profile',
       };
     }
   }

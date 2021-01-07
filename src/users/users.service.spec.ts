@@ -15,14 +15,14 @@ const mockRepository = () => ({
   delete: jest.fn(),
 });
 
-const mockJwtService = {
+const mockJwtService = () => ({
   sign: jest.fn(() => 'signed-token'),
   verify: jest.fn(),
-};
+});
 
-const mockMailService = {
+const mockMailService = () => ({
   sendVerificationEmail: jest.fn(),
-};
+});
 
 type MockRepository<T = any> = Partial<Record<keyof Repository<T>, jest.Mock>>;
 
@@ -42,8 +42,8 @@ describe('UserService', () => {
           provide: getRepositoryToken(Verification),
           useValue: mockRepository(),
         },
-        { provide: JwtService, useValue: mockJwtService },
-        { provide: MailService, useValue: mockMailService },
+        { provide: JwtService, useValue: mockJwtService() },
+        { provide: MailService, useValue: mockMailService() },
       ],
     }).compile();
     service = module.get<UsersService>(UsersService);
@@ -236,6 +236,34 @@ describe('UserService', () => {
         newUser.email,
         newVerification.code,
       );
+    });
+
+    it('shoud change password', async () => {
+      const editProfileArgs = {
+        userId: 1,
+        input: {
+          password: 'newpassowrd',
+        },
+      };
+      usersRepository.findOne.mockResolvedValue({
+        password: 'currentpassword',
+      });
+      const result = await service.editProfile(
+        editProfileArgs.userId,
+        editProfileArgs.input,
+      );
+      expect(usersRepository.save).toHaveBeenCalledTimes(1);
+      expect(usersRepository.save).toHaveBeenCalledWith(editProfileArgs.input);
+      expect(result).toEqual({ ok: true });
+    });
+
+    it('should fail on exception', async () => {
+      usersRepository.findOne.mockRejectedValue(new Error());
+      const result = await service.editProfile(1, { password: 'newpassword' });
+      expect(result).toEqual({
+        ok: false,
+        error: 'Could not update profile',
+      });
     });
   });
 
