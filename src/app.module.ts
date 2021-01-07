@@ -44,7 +44,8 @@ import { MailModule } from './mail/mail.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod', // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
-      logging: process.env.NODE_ENV !== 'prod', // console에 logging하는 옵션
+      logging:
+        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test', // console에 logging하는 옵션
       entities: [User, Verification],
     }),
     GraphQLModule.forRoot({
