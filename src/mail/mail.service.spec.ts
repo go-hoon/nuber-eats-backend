@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { CONFIG_OPTIONS } from 'src/common/common.constants';
 import { MailService } from './mail.service';
 
-jest.mock('got', () => {});
+jest.mock('got');
 jest.mock('form-data', () => {
   return {
     append: jest.fn(),
@@ -35,4 +35,27 @@ describe('MailService', () => {
 
   it.todo('sendEmail');
   it.todo('sendVerificationEmail');
+
+  describe('sendVerificationEmail', () => {
+    it('should call sendEmail', () => {
+      const sendVerificationEmailArgs = {
+        email: 'test@email.com',
+        code: 'test',
+      };
+      jest.spyOn(service, 'sendEmail').mockImplementation(async () => {});
+      service.sendVerificationEmail(
+        sendVerificationEmailArgs.email,
+        sendVerificationEmailArgs.code,
+      );
+      expect(service.sendEmail).toHaveBeenCalledTimes(1);
+      expect(service.sendEmail).toHaveBeenCalledWith(
+        'Verify your email',
+        'confirm',
+        [
+          { key: 'code', value: sendVerificationEmailArgs.code },
+          { key: 'username', value: sendVerificationEmailArgs.email },
+        ],
+      );
+    });
+  });
 });
