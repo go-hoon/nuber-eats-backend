@@ -26,6 +26,11 @@ describe('UserModule (e2e)', () => {
   let verificationsRepository: Repository<Verification>;
   let jwtToken: string;
 
+  const baseTest = () => request(app.getHttpServer()).post(GRAPHQL_ENDPOINT);
+  const publicTest = (query: string) => baseTest().send({ query });
+  const privateTest = (query: string) =>
+    baseTest().set('x-jwt', jwtToken).send({ query });
+
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -46,18 +51,14 @@ describe('UserModule (e2e)', () => {
 
   describe('createAccount', () => {
     it('should create account', () => {
-      return request(app.getHttpServer())
-        .post(GRAPHQL_ENDPOINT)
-        .send({
-          query: `mutation {
+      return publicTest(`mutation {
         createAccount(
           input: { email: "${testUser.email}", password: "${testUser.password}", role: Owner }
         ) {
           ok
           error
         }
-      }`,
-        })
+      }`)
         .expect(200)
         .expect((res) => {
           expect(res.body.data.createAccount.ok).toBe(true);
@@ -66,18 +67,14 @@ describe('UserModule (e2e)', () => {
     });
 
     it('should fail if account already exists', async () => {
-      return request(app.getHttpServer())
-        .post(GRAPHQL_ENDPOINT)
-        .send({
-          query: `mutation {
+      return publicTest(`mutation {
         createAccount(
           input: { email: "${testUser.email}", password: "${testUser.password}", role: Owner }
         ) {
           ok
           error
         }
-      }`,
-        })
+      }`)
         .expect(200)
         .expect((res) => {
           expect(res.body.data.createAccount.ok).toBe(false);

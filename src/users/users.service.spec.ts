@@ -222,7 +222,7 @@ describe('UserService', () => {
 
       await service.editProfile(editProfileArgs.userId, editProfileArgs.input);
 
-      expect(usersRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(usersRepository.findOne).toHaveBeenCalledTimes(2);
       expect(usersRepository.findOne).toHaveBeenCalledWith({
         id: editProfileArgs.userId,
       });
