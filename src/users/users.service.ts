@@ -105,6 +105,13 @@ export class UsersService {
     try {
       const user = await this.users.findOne({ id: userId });
       if (email) {
+        const existingUser = await this.users.findOne({ email });
+        if (existingUser) {
+          return {
+            ok: false,
+            error: 'The email is already taken',
+          };
+        }
         user.email = email;
         user.verified = false;
         await this.verifications.delete({ user });
