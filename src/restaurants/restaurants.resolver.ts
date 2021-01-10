@@ -33,7 +33,7 @@ export class RestaurantsResolver {
   editRestaurant(
     @AuthUser() authUser: User,
     @Args('input') editRestaurantInput: EditRestaurantInput,
-  ) {
-    return this.restaurantService.editRestaurant(editRestaurantInput);
+  ): Promise<EditRestaurantOutput> {
+    return this.restaurantService.editRestaurant(authUser, editRestaurantInput);
   }
 }

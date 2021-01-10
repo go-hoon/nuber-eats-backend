@@ -12,6 +12,7 @@ import {
 } from './dtos/edit-restaurant.dto';
 import { Category } from './entities/category.entity';
 import { Restaurant } from './entities/restaurant.entity';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Injectable()
 export class RestaurantsService {
@@ -20,8 +21,7 @@ export class RestaurantsService {
     private readonly restaurants: Repository<Restaurant>,
     @InjectRepository(User)
     private readonly users: Repository<User>,
-    @InjectRepository(Category)
-    private readonly categories: Repository<Category>,
+    private readonly categories: CategoryRepository,
   ) {}
 
   async createRestaurant(
@@ -31,7 +31,7 @@ export class RestaurantsService {
     try {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
       newRestaurant.owner = authUser;
-      const category = await this.getOrCreateCategory(
+      const category = await this.categories.getOrCreate(
         createRestaurantInput.categoryName,
       );
       newRestaurant.category = category;
@@ -47,18 +47,6 @@ export class RestaurantsService {
         error: "Can't make the restaurant",
       };
     }
-  }
-
-  async getOrCreateCategory(name: string): Promise<Category> {
-    const categoryName = name.trim().toLowerCase();
-    const categorySlug = categoryName.replace(/ /g, '-');
-    let category = await this.categories.findOne({ slug: categorySlug });
-    if (!category) {
-      category = await this.categories.save(
-        this.categories.create({ slug: categorySlug, name: categoryName }),
-      );
-    }
-    return category;
   }
 
   async editRestaurant(
@@ -81,6 +69,21 @@ export class RestaurantsService {
           error: 'Only owner can edit the restaurant',
         };
       }
+
+      let category: Category = null;
+      if (editRestaurantInput.categoryName) {
+        category = await this.categories.getOrCreate(
+          editRestaurantInput.categoryName,
+        );
+      }
+
+      await this.restaurants.save([
+        {
+          id: editRestaurantInput.restaurantId,
+          ...editRestaurantInput,
+          ...(category ? { category } : null),
+        },
+      ]);
 
       return {
         ok: true,
