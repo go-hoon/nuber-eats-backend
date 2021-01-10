@@ -150,4 +150,8 @@ export class RestaurantsService {
       };
     }
   }
+
+  async countRestaurants(category: Category) {
+    return this.restaurants.count({ category });
+  }
 }

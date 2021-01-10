@@ -2,6 +2,7 @@ import {
   Args,
   Int,
   Mutation,
+  Parent,
   Query,
   ResolveField,
   Resolver,
@@ -68,8 +69,8 @@ export class CategoryResolver {
   constructor(private readonly restaurantService: RestaurantsService) {}
 
   @ResolveField(() => Int)
-  restaurantCount(): number {
-    return 80;
+  restaurantCount(@Parent() category: Category): Promise<number> {
+    return this.restaurantService.countRestaurants(category);
   }
 
   @Query(() => AllCategoriesOutput)
