@@ -9,10 +9,12 @@ import {
   CreateRestaurantInput,
   CreateRestaurantOutput,
 } from './dtos/create-restaurant.dto';
+import { DeleteDishInput } from './dtos/delete-dish.dto';
 import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dtos/delete-restaurant.dto';
+import { EditDishInput, EditDishOutput } from './dtos/edit-dish.dto';
 import {
   EditRestaurantInput,
   EditRestaurantOutput,
@@ -309,6 +311,75 @@ export class RestaurantsService {
       return {
         ok: false,
         error: "Can't create the dish",
+      };
+    }
+  }
+
+  async editDish(
+    owner: User,
+    editDishInput: EditDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(
+        { id: editDishInput.dishId },
+        { relations: ['restaurant'] },
+      );
+      if (!dish) {
+        return {
+          ok: false,
+          error: 'The dish not found',
+        };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: 'Only owner can delete the dish',
+        };
+      }
+      await this.dishes.save([{ id: editDishInput.dishId, ...editDishInput }]);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        ok: false,
+        error: "Can't edit dish",
+      };
+    }
+  }
+
+  async deleteDish(
+    owner: User,
+    { dishId }: DeleteDishInput,
+  ): Promise<EditDishOutput> {
+    try {
+      const dish = await this.dishes.findOne(
+        { id: dishId },
+        { relations: ['restaurant'] },
+      );
+      if (!dish) {
+        return {
+          ok: false,
+          error: 'The dish not found',
+        };
+      }
+      if (dish.restaurant.ownerId !== owner.id) {
+        return {
+          ok: false,
+          error: 'Only owner can delete the dish',
+        };
+      }
+
+      await this.dishes.remove(dish);
+      return {
+        ok: true,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        ok: false,
+        error: "Can't delete dish",
       };
     }
   }
