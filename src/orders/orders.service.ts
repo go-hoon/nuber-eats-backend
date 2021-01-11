@@ -27,6 +27,11 @@ export class OrdersService {
         };
       }
 
+      const order = await this.orders.save(
+        this.orders.create({ customer, restaurant }),
+      );
+      const items = {};
+
       return {
         ok: true,
       };
