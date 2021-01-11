@@ -20,6 +20,8 @@ import { RestaurantsModule } from './restaurants/restaurant.module';
 import { Restaurant } from './restaurants/entities/restaurant.entity';
 import { Category } from './restaurants/entities/category.entity';
 import { Dish } from './restaurants/entities/dish.entity';
+import { OrdersModule } from './orders/orders.module';
+import { Order } from './orders/entities/order.entity';
 
 @Module({
   imports: [
@@ -50,7 +52,7 @@ import { Dish } from './restaurants/entities/dish.entity';
       synchronize: process.env.NODE_ENV !== 'prod', // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
       logging:
         process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test', // console에 logging하는 옵션
-      entities: [User, Verification, Restaurant, Category, Dish],
+      entities: [User, Verification, Restaurant, Category, Dish, Order],
     }),
     GraphQLModule.forRoot({
       autoSchemaFile: true,
@@ -68,6 +70,7 @@ import { Dish } from './restaurants/entities/dish.entity';
     AuthModule,
     UsersModule,
     RestaurantsModule,
+    OrdersModule,
   ],
   controllers: [],
   providers: [],

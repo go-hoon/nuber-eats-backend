@@ -10,6 +10,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
+import { Order } from 'src/orders/entities/order.entity';
 
 export enum UserRole {
   Client = 'Client',
@@ -49,6 +50,20 @@ export class User extends CoreEntity {
     onDelete: 'SET NULL',
   })
   restaurants: Restaurant[];
+
+  @Field(() => [Order], { nullable: true })
+  @OneToMany(() => Order, (order) => order.customer, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  orders: [Order];
+
+  @Field(() => [Order], { nullable: true })
+  @OneToMany(() => Order, (order) => order.driver, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  rides: [Order];
 
   @BeforeInsert()
   @BeforeUpdate()
