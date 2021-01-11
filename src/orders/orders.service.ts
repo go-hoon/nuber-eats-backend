@@ -22,10 +22,12 @@ export class OrdersService {
 
   async createOrder(
     customer: User,
-    { items, restaurantId }: CreateOrderInput,
+    createOrderInput: CreateOrderInput,
   ): Promise<CreateOrderOutput> {
     try {
-      const restaurant = await this.restaurants.findOne({ id: restaurantId });
+      const restaurant = await this.restaurants.findOne({
+        id: createOrderInput.restaurantId,
+      });
       if (!restaurant) {
         return {
           ok: false,
@@ -33,7 +35,9 @@ export class OrdersService {
         };
       }
 
-      for (const item of items) {
+      let orderFinalPrice = 0;
+      const orderItems: OrderItem[] = [];
+      for (const item of createOrderInput.items) {
         const dish = await this.dishes.findOne({ id: item.dishId });
         if (!dish) {
           return {
@@ -41,33 +45,41 @@ export class OrdersService {
             error: 'Dish not found',
           };
         }
-        console.log(`Dish price: ${dish.price}`);
+
+        let dishFinalPrice = dish.price;
         for (const itemOption of item.options) {
           const dishOption = dish.options.find(
             (dishOption) => dishOption.name === itemOption.name,
           );
           if (dishOption) {
             if (dishOption.extra) {
-              console.log(`USD +${dishOption.extra}`);
+              dishFinalPrice += dishOption.extra;
             } else {
               const disOptionChoice = dishOption.choices.find(
                 (optionChoice) => optionChoice.name === itemOption.choice,
               );
               if (disOptionChoice.extra) {
-                console.log(`USD +${disOptionChoice.extra}`);
+                dishFinalPrice += disOptionChoice.extra;
               }
             }
           }
         }
-
-        // await this.orderItems.save(
-        //   this.orderItems.create({ dish, options: item.options }),
-        // );
+        orderFinalPrice += dishFinalPrice;
+        const orderItem = await this.orderItems.save(
+          this.orderItems.create({ dish, options: item.options }),
+        );
+        orderItems.push(orderItem);
       }
-      // const order = await this.orders.save(
-      //   this.orders.create({ customer, restaurant }),
-      // );
-      // const items = {};
+
+      const order = await this.orders.save(
+        this.orders.create({
+          customer,
+          restaurant,
+          total: orderFinalPrice,
+          items: orderItems,
+        }),
+      );
+      console.log(order);
 
       return {
         ok: true,
