@@ -52,7 +52,8 @@ import { OrderItem } from './orders/entities/order-item.entity';
       database: process.env.DB_NAME,
       synchronize: process.env.NODE_ENV !== 'prod', // TypeORM이 database에 연결할 때, 현재 상태를 migration 함
       logging:
-        process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test', // console에 logging하는 옵션
+        // process.env.NODE_ENV !== 'prod' && process.env.NODE_ENV !== 'test', // console에 logging하는 옵션
+        false,
       entities: [
         User,
         Verification,

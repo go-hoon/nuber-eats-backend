@@ -5,6 +5,7 @@ import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User, UserRole } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderInput, CreateOrderOutput } from './dtos/create-order.dto';
+import { GetOrderInput, GetOrderOutput } from './dtos/get-order.dto';
 import { GetOrdersInput, GetOrdersOutput } from './dtos/get-orders.dto';
 import { OrderItem } from './entities/order-item.entity';
 import { Order } from './entities/order.entity';
@@ -97,25 +98,29 @@ export class OrdersService {
     user: User,
     { status }: GetOrdersInput,
   ): Promise<GetOrdersOutput> {
+    console.log(status);
     try {
       let orders: Order[];
       if (user.role === UserRole.Client) {
         orders = await this.orders.find({
           where: {
             customer: user,
-            status,
+            ...(status && { status }),
           },
         });
       } else if (user.role === UserRole.Delivery) {
         orders = await this.orders.find({
-          where: { driver: user, status },
+          where: { driver: user, ...(status && { status }) },
         });
       } else if (user.role === UserRole.Owner) {
         const restaurants = await this.restaurants.find({
-          where: { owner: user },
+          where: { owner: user, ...(status && { status }) },
           relations: ['orders'],
         });
         orders = restaurants.map((restaurant) => restaurant.orders).flat(1);
+        if (status) {
+          orders = orders.filter((order) => order.status === status);
+        }
       }
       return {
         ok: true,
@@ -125,6 +130,52 @@ export class OrdersService {
       return {
         ok: false,
         error: "Can't get orders",
+      };
+    }
+  }
+
+  async getOrder(user: User, { id }: GetOrderInput): Promise<GetOrderOutput> {
+    try {
+      const order = await this.orders.findOne(
+        { id },
+        { relations: ['restaurant', 'items', 'items.dish'] },
+      );
+      if (!order) {
+        return {
+          ok: false,
+          error: 'Order not found',
+        };
+      }
+
+      let canSee = true;
+      if (user.role === UserRole.Client && order.customerId !== user.id) {
+        canSee = false;
+      } else if (
+        user.role === UserRole.Delivery &&
+        order.driverId !== user.id
+      ) {
+        canSee = false;
+      } else if (
+        user.role === UserRole.Owner &&
+        order.restaurant.ownerId !== user.id
+      ) {
+        canSee = false;
+      }
+      if (!canSee) {
+        return {
+          ok: false,
+          error: "You can't see this",
+        };
+      }
+
+      return {
+        ok: true,
+        order,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'Can not load the order',
       };
     }
   }
