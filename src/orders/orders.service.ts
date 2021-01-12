@@ -187,7 +187,10 @@ export class OrdersService {
     { id, status }: EditOrderInput,
   ): Promise<EditOrderOutput> {
     try {
-      const order = await this.orders.findOne({ id }, { relations: [''] });
+      const order = await this.orders.findOne(
+        { id },
+        { relations: ['restaurant'] },
+      );
       if (!order) {
         return {
           ok: false,
@@ -233,6 +236,7 @@ export class OrdersService {
         ok: true,
       };
     } catch (e) {
+      console.log(e);
       return {
         ok: false,
         error: "Can't edit the order",
