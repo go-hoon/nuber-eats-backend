@@ -85,7 +85,9 @@ export class OrdersService {
           items: orderItems,
         }),
       );
-      await this.pubSub.publish(NEW_PENDING_ORDER, { pendingOrders: order });
+      await this.pubSub.publish(NEW_PENDING_ORDER, {
+        pendingOrders: { ownerId: restaurant.ownerId, order },
+      });
 
       return {
         ok: true,
