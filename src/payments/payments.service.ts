@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { Cron, Interval, SchedulerRegistry, Timeout } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Restaurant } from 'src/restaurants/entities/restaurant.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -17,7 +16,6 @@ export class PaymentsService {
     @InjectRepository(Payment) private readonly payments: Repository<Payment>,
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
-    private scheduleRegistry: SchedulerRegistry,
   ) {}
 
   async createPayment(
@@ -38,9 +36,17 @@ export class PaymentsService {
           error: 'You are not allowed to do this',
         };
       }
+
       await this.payments.save(
         this.payments.create({ user: owner, transactionId, restaurant }),
       );
+
+      restaurant.isPromoted = true;
+      const date = new Date();
+      date.setDate(date.getDate() + 7);
+      restaurant.promotedUntil = date;
+      this.restaurants.save(restaurant);
+
       return {
         ok: true,
       };
@@ -64,23 +70,5 @@ export class PaymentsService {
         error: "Can't get payments",
       };
     }
-  }
-
-  @Cron('30 * * * * *', { name: 'myJob' })
-  checkForPaymentsC() {
-    console.log('checking for payments...(cron)');
-    const job = this.scheduleRegistry.getCronJob('myJob');
-    console.log(job);
-    job.stop();
-  }
-
-  @Interval(5000)
-  checkForPaymentsI() {
-    console.log('checking for payments...(interval)');
-  }
-
-  @Timeout(20000)
-  afterStart() {
-    console.log('Timeout!');
   }
 }
