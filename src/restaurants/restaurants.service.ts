@@ -19,6 +19,7 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import { MyRestaurantsOutput } from './dtos/my-restaurants.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import {
@@ -63,6 +64,31 @@ export class RestaurantsService {
       return {
         ok: false,
         error: "Can't make the restaurant",
+      };
+    }
+  }
+
+  async myRestaurants(authUser: User): Promise<MyRestaurantsOutput> {
+    try {
+      const restaurants = await this.restaurants.find({
+        where: { owner: authUser },
+        relations: ['category'],
+      });
+      if (!restaurants || restaurants.length === 0) {
+        return {
+          ok: true,
+          restaurants: null,
+        };
+      }
+      return {
+        ok: true,
+        restaurants,
+      };
+    } catch (e) {
+      console.log(e);
+      return {
+        ok: false,
+        error: e.message,
       };
     }
   }
@@ -190,6 +216,7 @@ export class RestaurantsService {
         order: {
           isPromoted: 'DESC',
         },
+        relations: ['category'],
       });
 
       const totalPages = (await this.countRestaurants(category)) / 25;
@@ -211,8 +238,8 @@ export class RestaurantsService {
   async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
     try {
       const [restaurants, totalResults] = await this.restaurants.findAndCount({
-        take: 25,
-        skip: (page - 1) * 25,
+        take: 3,
+        skip: (page - 1) * 3,
         order: {
           isPromoted: 'DESC',
         },
@@ -221,7 +248,7 @@ export class RestaurantsService {
       return {
         ok: true,
         results: restaurants,
-        totalPages: Math.ceil(totalResults / 25),
+        totalPages: Math.ceil(totalResults / 3),
         totalResults,
       };
     } catch (e) {
@@ -238,7 +265,7 @@ export class RestaurantsService {
     try {
       const restaurant = await this.restaurants.findOne(
         { id: restaurantId },
-        { relations: ['menu'] },
+        { relations: ['menu', 'category'] },
       );
       if (!restaurant) {
         return {
