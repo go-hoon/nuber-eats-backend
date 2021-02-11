@@ -19,6 +19,10 @@ import {
   EditRestaurantInput,
   EditRestaurantOutput,
 } from './dtos/edit-restaurant.dto';
+import {
+  MyRestaurantInput,
+  MyRestaurantOutput,
+} from './dtos/my-restaurant.dto';
 import { MyRestaurantsOutput } from './dtos/my-restaurants.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
@@ -58,12 +62,34 @@ export class RestaurantsService {
       await this.restaurants.save(newRestaurant);
       return {
         ok: true,
+        restaurantId: newRestaurant.id,
       };
     } catch (e) {
       console.log(e);
       return {
         ok: false,
         error: "Can't make the restaurant",
+      };
+    }
+  }
+
+  async myRestaurant(
+    authUser: User,
+    { id }: MyRestaurantInput,
+  ): Promise<MyRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        owner: authUser,
+        id,
+      });
+      return {
+        ok: true,
+        restaurant,
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        error: 'Could not find restaurants.',
       };
     }
   }

@@ -60,6 +60,8 @@ export class RestaurantsResolver {
     return this.restaurantService.myRestaurants(authUser);
   }
 
+  @Query(()=>)
+
   @Mutation(() => EditRestaurantOutput)
   @Role(['Owner'])
   editRestaurant(
